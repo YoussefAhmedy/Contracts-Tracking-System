@@ -1,0 +1,231 @@
+﻿@model Contract
+@using System.Text.Json
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة عقد جديد</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .btn-submit {
+            background-color: #4e73df;
+            color: white;
+            font-weight: 600;
+        }
+
+            .btn-submit:hover {
+                background-color: #2e59d9;
+            }
+
+        .container {
+            margin-top: 50px;
+            max-width: 700px;
+        }
+
+        /* Styling for suggestions */
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+        }
+
+            .autocomplete-items div {
+                padding: 10px;
+                cursor: pointer;
+            }
+
+                .autocomplete-items div:hover {
+                    background-color: #e9e9e9;
+                }
+
+        /* Validation colors */
+        .is-valid {
+            border: 2px solid #28a745 !important; /* أخضر */
+        }
+
+        .is-invalid {
+            border: 2px solid #dc3545 !important; /* أحمر */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card p-4">
+            <h2 class="text-center mb-4">إضافة عقد جديد</h2>
+            <form autocomplete="off" method="post" id="contractForm">
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">اسم العقد</label>
+                    <input asp-for="Name" type="text" class="form-control" id="Name" maxlength="150" placeholder="أدخل اسم العقد" required>
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ContractNumber" class="form-label">رقم العقد</label>
+                    <input asp-for="ContractNumber" type="text" class="form-control" id="ContractNumber" maxlength="100" placeholder="أدخل رقم العقد">
+                    <span asp-validation-for="ContractNumber" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ContractKind" class="form-label">نوع العقد</label>
+                    <select asp-for="ContractKind" class="form-select" id="ContractKind" required>
+                        <option value="بيع">بيع</option>
+                        <option value="إيجار">إيجار</option>
+                        <option value="صيانة">صيانة</option>
+                    </select>
+                    <span asp-validation-for="ContractKind" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="StartContract" class="form-label">تاريخ بداية العقد</label>
+                    <input asp-for="StartContract" type="date" class="form-control" id="StartContract" required>
+                    <span asp-validation-for="StartContract" class="text-danger" id="startError"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="EndContract" class="form-label">تاريخ نهاية العقد</label>
+                    <input asp-for="EndContract" type="date" class="form-control" id="EndContract" required>
+                    <span asp-validation-for="EndContract" class="text-danger" id="endError"></span>
+                </div>
+
+                <!-- اختيار العميل -->
+                <div class="mb-3 position-relative">
+                    <label class="form-label">العميل</label>
+                    <input type="text" class="form-control" id="CustomerName" placeholder="اكتب اسم العميل" required>
+                    <input asp-for="CustomerID" type="hidden" id="CustomerID" />
+                    <div id="customer-list" class="autocomplete-items"></div>
+                    <span asp-validation-for="CustomerID" class="text-danger" id="customerError"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Notes" class="form-label">ملاحظات</label>
+                    <textarea asp-for="Notes" class="form-control" id="Notes" rows="3" maxlength="500" placeholder="أي ملاحظات إضافية"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-submit btn-lg">إضافة العقد</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // جلب قائمة العملاء (id + name)
+        const customers = @Html.Raw(JsonSerializer.Serialize(ViewBag.Customers));
+
+        const input = document.getElementById("CustomerName");
+        const hiddenId = document.getElementById("CustomerID");
+        const list = document.getElementById("customer-list");
+        const customerError = document.getElementById("customerError");
+
+        const startInput = document.getElementById("StartContract");
+        const endInput = document.getElementById("EndContract");
+        const startError = document.getElementById("startError");
+        const endError = document.getElementById("endError");
+
+        // autocomplete
+        input.addEventListener("input", function () {
+            const val = this.value;
+            list.innerHTML = "";
+            hiddenId.value = "";
+            if (!val) return;
+            const matches = customers.filter(c => c.name.toLowerCase().includes(val.toLowerCase()));
+            matches.forEach(match => {
+                const div = document.createElement("div");
+                div.textContent = match.name;
+                div.addEventListener("click", function () {
+                    input.value = match.name;
+                    hiddenId.value = match.id;
+                    list.innerHTML = "";
+                    input.classList.remove("is-invalid");
+                    input.classList.add("is-valid");
+                    customerError.textContent = "";
+                });
+                list.appendChild(div);
+            });
+        });
+
+        document.addEventListener("click", function (e) {
+            if (e.target !== input) list.innerHTML = "";
+        });
+
+        // validation function
+        function setValid(input, errorSpan, message = "") {
+            if (message) {
+                input.classList.add("is-invalid");
+                input.classList.remove("is-valid");
+                errorSpan.textContent = message;
+            } else {
+                input.classList.remove("is-invalid");
+                input.classList.add("is-valid");
+                errorSpan.textContent = "";
+            }
+        }
+
+        document.getElementById("contractForm").addEventListener("submit", function (e) {
+            let valid = true;
+
+            // check customer
+            const customer = customers.find(c => c.name === input.value);
+            if (!customer) {
+                setValid(input, customerError, "⚠️ يجب اختيار عميل من القائمة.");
+                hiddenId.value = "";
+                valid = false;
+            } else {
+                hiddenId.value = customer.id;
+                setValid(input, customerError);
+            }
+
+            // check dates
+            if (startInput.value && endInput.value) {
+                const startDate = new Date(startInput.value);
+                const endDate = new Date(endInput.value);
+                if (startDate > endDate) {
+                    setValid(startInput, startError, "⚠️ تاريخ البداية لا يمكن أن يكون بعد تاريخ النهاية.");
+                    setValid(endInput, endError, "⚠️ تاريخ النهاية لا يمكن أن يكون قبل تاريخ البداية.");
+                    valid = false;
+                } else {
+                    setValid(startInput, startError);
+                    setValid(endInput, endError);
+                }
+            } else {
+                if (!startInput.value) {
+                    setValid(startInput, startError, "⚠️ يجب إدخال تاريخ البداية.");
+                    valid = false;
+                }
+                if (!endInput.value) {
+                    setValid(endInput, endError, "⚠️ يجب إدخال تاريخ النهاية.");
+                    valid = false;
+                }
+            }
+
+            if (!valid) {
+                e.preventDefault();
+                alert("⚠️ الرجاء تصحيح الأخطاء قبل الحفظ.");
+            }
+        });
+    </script>
+</body>
+</html>

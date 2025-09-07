@@ -1,0 +1,143 @@
+﻿@model List<Customer>
+
+<div class="container mt-4">
+    <h2 class="mb-4">قائمة العملاء</h2>
+
+    <div class="mb-3 text-end">
+        <a href="@Url.Action("Create")" class="btn btn-success">
+            <i class="bi bi-person-plus"></i> إضافة عميل جديد
+        </a>
+    </div>
+
+    <table class="table table-striped table-hover shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>الرقم</th>
+                <th>الاسم</th>
+                <th>الهاتف</th>
+                <th>البريد الإلكتروني</th>
+                <th>نوع العميل</th>
+                <th>العنوان</th>
+                <th>تاريخ الإضافة</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var customer in Model)
+            {
+                <tr>
+                    <td>@customer.ID</td>
+                    <td>@customer.Name</td>
+                    <td>@customer.Phone</td>
+                    <td>@customer.EmailAddress</td>
+                    <td>@customer.CustomerKind</td>
+                    <td>@customer.CreatedAt.ToString("yyyy/MM/dd")</td>
+                    <td>
+                        <button type="button"
+                                class="btn btn-danger btn-sm me-1"
+                                title="حذف"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteModal"
+                                data-id="@customer.ID"
+                                data-name="@customer.Name">
+                            <i class="bi bi-trash"></i>
+                        </button>
+
+                        <a asp-controller="Customer"
+                           asp-action="Edit"
+                           asp-route-id="@customer.ID"
+                           class="btn btn-primary btn-sm"
+                           title="تعديل">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            @{
+                int currentPage = (int)ViewData["CurrentPage"];
+                int totalPages = (int)ViewData["TotalPages"];
+            }
+
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1 })">السابق</a>
+            </li>
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1 })">التالي</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+            <!-- Modal تأكيد الحذف -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+            <div class="modal-header bg-danger text-white rounded-top-4">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> تأكيد الحذف
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <p class="fs-5 mb-1">هل أنت متأكد أنك تريد حذف العميل <strong id="deleteCustomerName"></strong>؟</p>
+                <p class="text-muted mb-0">هذا الإجراء لا يمكن التراجع عنه.</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <form id="deleteForm" method="post">
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="bi bi-check-circle me-1"></i> موافق
+                    </button>
+                </form>
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- تأثير دخول بدون keyframes -->
+<style>
+    /* لا يوجد أي  هنا → ما فيه تعارض مع Razor */
+    #deleteModal .modal-dialog {
+        transform: translateY(-16px);
+        opacity: 0;
+        transition: transform .25s ease, opacity .25s ease;
+    }
+    #deleteModal.show .modal-dialog {
+        transform: translateY(0);
+        opacity: 1;
+    }
+</style>
+
+@section Scripts {
+<script>
+    // ضبط رابط الحذف واسم العميل عند فتح المودال
+    document.addEventListener('DOMContentLoaded', function () {
+        var deleteModalEl = document.getElementById('deleteModal');
+        deleteModalEl.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var id = button.getAttribute('data-id');
+            var name = button.getAttribute('data-name') || '';
+
+            document.getElementById('deleteCustomerName').textContent = name;
+
+            var form = document.getElementById('deleteForm');
+            form.setAttribute('action', '/Customer/Delete/' + id);
+        });
+    });
+</script>
+}

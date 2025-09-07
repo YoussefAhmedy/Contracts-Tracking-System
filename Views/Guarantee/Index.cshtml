@@ -1,0 +1,160 @@
+﻿@model IEnumerable<Guarantee>
+
+<div class="container-fluid mt-4">
+    <!-- العنوان + زر إضافة -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold mb-0">قائمة الضمانات</h2>
+        <a class="btn btn-success" asp-action="AddOrEdit" asp-controller="Guarantee">
+            <i class="bi bi-file-earmark-plus me-1"></i> إضافة ضمان جديد
+        </a>
+    </div>
+
+    <!-- بطاقة جدول الضمانات -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0 text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>الرقم</th>
+                        <th>اسم الضمان</th>
+                        <th>تاريخ البداية</th>
+                        <th>تاريخ النهاية</th>
+                        <th>الوصف</th>
+                        <th>اسم العقد</th>
+                        <th style="width:150px">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var guarantee in Model)
+                    {
+                        <tr>
+                            <td>@guarantee.ID</td>
+                            <td>@guarantee.Name</td>
+                            <td>@guarantee.GuaranteeStart.ToString("yyyy-MM-dd")</td>
+                            <td>@guarantee.GuaranteeEnd.ToString("yyyy-MM-dd")</td>
+                            <td>@guarantee.Description</td>
+                            <td>@guarantee.Contract.Name</td>
+                            <td>
+                                <!-- زر الحذف -->
+                                <button type="button"
+                                        class="btn btn-danger btn-sm me-1 delete-btn"
+                                        data-id="@guarantee.ID"
+                                        data-name="@guarantee.Name"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+
+                                <!-- زر التعديل -->
+                                <a asp-action="AddOrEdit" asp-route-id="@guarantee.ID" class="btn btn-primary btn-sm" title="تعديل">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- الباجيشن -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    @{
+                        int currentPage = (int)ViewData["CurrentPage"];
+                        int totalPages = (int)ViewData["TotalPages"];
+                    }
+
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1 })">السابق</a>
+                    </li>
+
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                        </li>
+                    }
+
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1 })">التالي</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- نافذة الحذف -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">تحذير</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="fs-5">هل أنت متأكد من حذف الضمان <strong id="guaranteeName"></strong> ؟</p>
+                <p class="text-muted">هذا الإجراء لا يمكن التراجع عنه.</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <form method="post" id="deleteForm">
+                    <input type="hidden" name="id" id="guaranteeIdToDelete" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-danger">حذف</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- سكربت للتعامل مع الحذف -->
+<script>
+    const deleteButtons = document.querySelectorAll(".delete-btn");
+    const guaranteeIdInput = document.getElementById("guaranteeIdToDelete");
+    const guaranteeNameLabel = document.getElementById("guaranteeName");
+    const deleteForm = document.getElementById("deleteForm");
+
+    deleteButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const id = this.getAttribute("data-id");
+            const name = this.getAttribute("data-name");
+
+            guaranteeIdInput.value = id;
+            guaranteeNameLabel.textContent = name;
+
+            // نحدد الـ action الخاص بالفورم
+            deleteForm.action = `/Guarantee/Delete/${id}`;
+        });
+    });
+</script>
+
+<!-- بعض التعديلات الجمالية -->
+<style>
+    h2 {
+        color: #2c3e50;
+    }
+
+    .card {
+        border-radius: 1rem;
+    }
+
+    .table th {
+        font-size: 0.95rem;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .btn {
+        border-radius: 0.6rem;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .modal-content {
+        border-radius: 1rem;
+    }
+</style>

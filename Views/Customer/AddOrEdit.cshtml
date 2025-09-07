@@ -1,0 +1,78 @@
+﻿@model Customer
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-primary text-white rounded-top-4">
+            <h4 class="mb-0"><i class="bi bi-person-plus-fill"></i> إضافة عميل جديد</h4>
+        </div>
+        <div class="card-body p-4">
+
+            <!-- Form Start -->
+            <form method="post">
+                <div class="row g-3">
+                    <!-- Name -->
+                    <div class="col-md-6">
+                        <label  asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" type="text" class="form-control" placeholder="أدخل اسم العميل">
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="col-md-6">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" type="tel" class="form-control" placeholder="05xxxxxxxx">
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <!-- Customer Kind -->
+                    <div class="col-md-6">
+                        <label class="form-label">نوع العميل</label>
+                        <select asp-for="CustomerKind" class="form-select">
+                            <option selected disabled>اختر نوع العميل</option>
+                            <option value="فرد">فرد</option>
+                            <option value="شركة">شركة</option>
+                        </select>
+                        <span asp-validation-for="CustomerKind" class="text-danger"></span>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-md-6">
+                        <label asp-for="EmailAddress" class="form-label"></label>
+                        <input asp-for="EmailAddress" type="email" class="form-control" placeholder="example@email.com">
+                        <span asp-validation-for="EmailAddress" class="text-danger"></span>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="col-12">
+                        <label asp-for="Address" class="form-label"></label>
+                        <textarea asp-for="Address" class="form-control" rows="2" placeholder="أدخل عنوان العميل"></textarea>
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+
+                    <!-- Created Date -->
+                    <div class="col-md-6">
+                        <label asp-for="CreatedAt" class="form-label"></label>
+                        <input asp-for="CreatedAt" type="date" class="form-control">
+                        <span asp-validation-for="CreatedAt" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-success px-4 me-2">
+                        <i class="bi bi-check-circle"></i> حفظ
+                    </button>
+                    <a href="#" class="btn btn-secondary px-4">
+                        <i class="bi bi-x-circle"></i> إلغاء
+                    </a>
+                </div>
+            </form>
+            <!-- Form End -->
+
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

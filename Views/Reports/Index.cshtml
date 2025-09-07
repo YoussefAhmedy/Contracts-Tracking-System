@@ -1,0 +1,190 @@
+﻿ 
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحة التقارير</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-light">
+
+    <div class="container py-4">
+        <h2 class="mb-4">صفحة التقارير</h2>
+
+        <!-- تبويبات -->
+        <ul class="nav nav-tabs mb-3" id="reportTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="contracts-tab" data-bs-toggle="tab" data-bs-target="#contracts" type="button" role="tab">العقود</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="warranties-tab" data-bs-toggle="tab" data-bs-target="#warranties" type="button" role="tab">الضمانات</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers" type="button" role="tab">العملاء</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="reportTabsContent">
+
+            <!-- تبويب العقود -->
+            <div class="tab-pane fade show active" id="contracts" role="tabpanel">
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <div class="card text-center bg-success text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">عقود نشطة</h5>
+                                <p class="card-text fs-4">@ViewBag.ActiveContracts</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-danger text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">عقود منتهية</h5>
+                                <p class="card-text fs-4">@ViewBag.FinishedContracts</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-warning text-dark">
+                            <div class="card-body">
+                                <h5 class="card-title">ستنتهي قريبًا</h5>
+                                <p class="card-text fs-4">@ViewBag.SoonFinishedContracts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5>جدول العقود</h5>
+                <table class="table table-bordered table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>رقم العقد</th>
+                            <th>العميل</th>
+                            <th>نوع العقد</th>
+                            <th>تاريخ البداية</th>
+                            <th>تاريخ النهاية</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in ViewBag.ContractsTable)
+                        {
+                            <tr>
+                                <td>@item.number</td>
+                                <td>@item.CustomerName</td>
+                                <td>@item.Kind</td>
+                                <td>@item.start.ToString("yyyy-MM-dd")</td>
+                                <td>@item.end.ToString("yyyy-MM-dd")</td>
+                                <td>@item.Status</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <canvas id="contractsChart" height="100"></canvas>
+            </div>
+
+            <!-- تبويب الضمانات -->
+            <div class="tab-pane fade" id="warranties" role="tabpanel">
+                <h5>جدول الضمانات</h5>
+                <table class="table table-bordered table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>الضمان</th>
+                            <th>العقد المرتبط</th>
+                            <th>تاريخ البداية</th>
+                            <th>تاريخ الانتهاء</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var guarantee in ViewBag.GuaranteesTable)
+                        {
+                            <tr>
+                                <td>@guarantee.Name</td>
+                                <td>@guarantee.ContractCount</td>
+                                <td>@guarantee.start.ToString("yyyy-MM-dd")</td>
+                                <td>@guarantee.end.ToString("yyyy-MM-dd")</td>
+                                <td>@guarantee.status</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <canvas id="warrantiesChart" height="100"></canvas>
+            </div>
+
+            <!-- تبويب العملاء -->
+            <div class="tab-pane fade" id="customers" role="tabpanel">
+                <h5>جدول العملاء</h5>
+                <table class="table table-bordered table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>العميل</th>
+                            <th>عدد العقود</th>
+                            <th>العقود النشطة</th>
+                            <th>العقود المنتهية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var custmoer in ViewBag.CustomersTable)
+                        {
+                            <tr>
+                                <td>@custmoer.Name</td>
+                                <td>@custmoer.ContractsCount</td>
+                                <td>@custmoer.ActiveContracts</td>
+                                <td>@custmoer.FinishedContracts</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Chart.js Scripts -->
+    <script>
+        const ctxContracts = document.getElementById('contractsChart').getContext('2d');
+        new Chart(ctxContracts, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(Json.Serialize(ViewBag.contractChartLables)),
+                datasets: [{
+                    data: @Html.Raw(Json.Serialize(ViewBag.contractChartData)),
+                    backgroundColor: ['#28a745','#dc3545','#ffc107']
+                }]
+            }
+        });
+
+        // Chart للضمانات
+        const ctxWarranties = document.getElementById('warrantiesChart').getContext('2d');
+        new Chart(ctxWarranties, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(ViewBag.guaranteeLables)),
+                datasets: [{
+                    label: 'عدد الأيام المتبقية',
+                    data: @Html.Raw(Json.Serialize(ViewBag.guaranteeData)),
+                    backgroundColor: ['#007bff','#17a2b8']
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
