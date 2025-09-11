@@ -86,8 +86,8 @@
 ---
 
 ## 👨‍💻 المطور
-- الاسم: **[Osamah Bagah]**
-- البريد: **[osamahbagah@gmail.com]**
+- الاسم: **[Youssef Ahmed]**
+- البريد: **[youssef.ahmedy189@gmail.com]**
 - GitHub: [https://github.com/YourUsername](https://github.com/YourUsername)
 
 ---
